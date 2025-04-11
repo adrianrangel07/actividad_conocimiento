@@ -1,3 +1,4 @@
+import 'package:actividad_conocimiento/Screen/CarDetailsScreen.dart';
 import 'package:actividad_conocimiento/Screen/CarListScreen.dart';
 import 'package:actividad_conocimiento/Screen/LoginScreen.dart';
 import 'package:actividad_conocimiento/Screen/MenuScreen.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/carList': (context) => CarListScreen(),
         '/menu': (context) => MenuScreen(),
         '/scanner': (context) => QRScannerScreen(),
+        '/detail': (context) => CarDetailScreen(car: ModalRoute.of(context)!.settings.arguments as Map),
       },
     );
   }

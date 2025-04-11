@@ -10,7 +10,6 @@ class QRScannerScreen extends StatefulWidget {
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
   bool scanned = false;
-  Map? carData;
 
   void handleBarcode(String code) async {
     if (!scanned) {
@@ -18,17 +17,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         scanned = true;
       });
 
-      final response = await http.get(Uri.parse(
-          'https://67f7d1812466325443eadd17.mockapi.io/carros/$code'));
+      final response = await http.get(Uri.parse('https://67f7d1812466325443eadd17.mockapi.io/carros/$code'));
 
       if (response.statusCode == 200) {
-        setState(() {
-          carData = jsonDecode(response.body);
-        });
+        final car = jsonDecode(response.body);
+        Navigator.pushNamed(context, '/detail', arguments: car);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Carro no encontrado')),
         );
+        setState(() {
+          scanned = false;
+        });
       }
     }
   }
@@ -37,46 +37,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Escanear QR')),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: MobileScanner(
-              onDetect: (capture) {
-                final barcodes = capture.barcodes;
-                if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
-                  handleBarcode(barcodes.first.rawValue!);
-                }
-              },
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: carData != null
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Placa: ${carData!['placa']}'),
-                      Text('Conductor: ${carData!['conductor']}'),
-                      Text('ID: ${carData!['id']}'),
-                    ],
-                  )
-                : Center(child: Text('Escanea un código QR')),
-          ),
-        ],
+      body: MobileScanner(
+        onDetect: (capture) {
+          final barcodes = capture.barcodes;
+          if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
+            handleBarcode(barcodes.first.rawValue!);
+          }
+        },
       ),
-      floatingActionButton: scanned
-          ? FloatingActionButton(
-              onPressed: () {
-                setState(() {
-                  scanned = false;
-                  carData = null;
-                });
-              },
-              child: Icon(Icons.refresh),
-            )
-          : null,
     );
   }
 }
-
